@@ -1,0 +1,57 @@
+[
+  { "x": 60, "y": 580, "type": "start" },
+  { "x": 120, "y": 580, "type": "normal" },
+  { "x": 180, "y": 580, "type": "question" },
+  { "x": 240, "y": 580, "type": "normal" },
+  { "x": 300, "y": 580, "type": "treasure" },
+  { "x": 360, "y": 580, "type": "normal" },
+  { "x": 420, "y": 580, "type": "penalty" },
+  { "x": 480, "y": 580, "type": "normal" },
+  { "x": 540, "y": 580, "type": "question" },
+  { "x": 600, "y": 580, "type": "normal" },
+
+  { "x": 600, "y": 520, "type": "normal" },
+  { "x": 600, "y": 460, "type": "treasure" },
+  { "x": 600, "y": 400, "type": "normal" },
+  { "x": 600, "y": 340, "type": "penalty" },
+  { "x": 600, "y": 280, "type": "normal" },
+
+  { "x": 540, "y": 280, "type": "question" },
+  { "x": 480, "y": 280, "type": "normal" },
+  { "x": 420, "y": 280, "type": "normal" },
+  { "x": 360, "y": 280, "type": "treasure" },
+  { "x": 300, "y": 280, "type": "normal" },
+
+  { "x": 240, "y": 280, "type": "penalty" },
+  { "x": 180, "y": 280, "type": "normal" },
+  { "x": 120, "y": 280, "type": "question" },
+  { "x": 60, "y": 280, "type": "normal" },
+
+  { "x": 60, "y": 220, "type": "normal" },
+  { "x": 120, "y": 220, "type": "treasure" },
+  { "x": 180, "y": 220, "type": "normal" },
+  { "x": 240, "y": 220, "type": "penalty" },
+  { "x": 300, "y": 220, "type": "normal" },
+
+  { "x": 360, "y": 220, "type": "normal" },
+  { "x": 420, "y": 220, "type": "question" },
+  { "x": 480, "y": 220, "type": "normal" },
+  { "x": 540, "y": 220, "type": "treasure" },
+  { "x": 600, "y": 220, "type": "normal" },
+
+  { "x": 600, "y": 160, "type": "normal" },
+  { "x": 540, "y": 160, "type": "penalty" },
+  { "x": 480, "y": 160, "type": "normal" },
+  { "x": 420, "y": 160, "type": "normal" },
+  { "x": 360, "y": 160, "type": "question" },
+
+  { "x": 300, "y": 160, "type": "normal" },
+  { "x": 240, "y": 160, "type": "treasure" },
+  { "x": 180, "y": 160, "type": "normal" },
+  { "x": 120, "y": 160, "type": "penalty" },
+  { "x": 60, "y": 160, "type": "normal" },
+
+  { "x": 60, "y": 100, "type": "question" },
+  { "x": 120, "y": 100, "type": "normal" },
+  { "x": 180, "y": 100, "type": "finish" }
+]

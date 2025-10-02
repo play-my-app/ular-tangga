@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Board Game Final</title>
+  <style>
+    /* ===== Canvas ===== */
+    #gameBoard {
+      border: 2px solid #333;
+      background: #f0f0f0;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ===== Dice Anim ===== */
+    #diceAnim {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      display: none;
+      z-index: 10;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    #diceAnim.show {
+      display: block;
+      animation: dicePop 0.5s ease-in-out;
+    }
+
+    @keyframes dicePop {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+      }
+
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    /* ===== Card Anim ===== */
+    #cardAnim {
+      position: absolute;
+      width: 120px;
+      height: 160px;
+      display: none;
+      z-index: 20;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      color: #fff;
+      padding: 5px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+
+    #cardAnim.show {
+      display: block;
+      animation: cardPop 0.5s ease-in-out;
+    }
+
+    #cardAnim img {
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    #cardAnim span {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+    }
+
+    /* Tombol close untuk card */
+    #cardCloseBtn {
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 21;
+      transition: background 0.2s ease;
+    }
+
+    #cardCloseBtn:hover {
+      background: rgba(255, 0, 0, 0.7);
+    }
+
+    @keyframes cardPop {
+      0% {
+        transform: scale(0.3);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Popup Kartu Besar */
+    #cardPopup {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+      transition: all 0.3s ease;
+    }
+
+    #cardPopup[style*="display: flex"] {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #closePopupBtn:hover {
+      background: rgba(255, 0, 0, 0.9) !important;
+      transform: scale(1.1);
+      transition: all 0.2s ease;
+    }
+
+    /* Hover effect untuk card kecil */
+    #cardAnim {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    #cardAnim:hover {
+      transform: scale(1.05);
+    }
+
+    /* ===== Question Modal ===== */
+    #questionModal {
+      position: fixed;
+      width: 500px;
+      max-width: 90%;
+      padding: 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
+      display: none;
+      z-index: 30;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    #questionImg {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      max-height: 250px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+
+    #questionOptions {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    #questionOptions button {
+      padding: 12px 25px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-width: 60px;
+    }
+
+    #questionOptions button:hover {
+      background: #2980b9;
+      transform: scale(1.05);
+    }
+
+    #modalClose {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      color: #e74c3c;
+      background: rgba(0, 0, 0, 0.1);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== Toast ===== */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      opacity: 0;
+      z-index: 50;
+      transition: opacity 0.3s ease;
+    }
+
+    #toast.show {
+      opacity: 1;
+    }
+
+    /* ===== Buttons Panel ===== */
+    #controls {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    #controls button {
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #2ecc71;
+      color: #fff;
+      transition: 0.2s;
+    }
+
+    #controls button:hover {
+      background: #27ae60;
+      transform: scale(1.05);
+    }
+
+    /* ===== Score & Turn Info ===== */
+    #scoreboard {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    #scoreboard span {
+      margin: 0 15px;
+      font-weight: bold;
+    }
+
+    /* ===== Mobile Friendly ===== */
+    @media(max-width:600px) {
+      @media(max-width:600px) {
+        #questionModal {
+          width: 95%;
+          padding: 15px;
+        }
+
+        #questionImg {
+          max-height: 200px;
+        }
+
+        #questionOptions {
+          gap: 10px;
+        }
+
+        #questionOptions button {
+          padding: 10px 20px;
+          font-size: 16px;
+          min-width: 50px;
+        }
+      }
+
+      #diceAnim {
+        width: 60px;
+        height: 60px;
+      }
+
+      #cardAnim {
+        width: 100px;
+        height: 140px;
+        font-size: 14px;
+      }
+    }
+
+    #musicBtn {
+      background: #9b59b6 !important;
+    }
+
+    #musicBtn:hover {
+      background: #8e44ad !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="gameBoard"></canvas>
+
+  <div id="diceAnim"><img id="diceImg" src="" alt="Dice"></div>
+  <div id="cardAnim"><img id="cardImg" src="" alt="Card"><span id="cardText"></span></div>
+
+  <!-- <div id="questionModal">
+    <div id="modalClose">✖</div>
+    <h3 id="modalQuestion"></h3>
+    <div id="modalOptions"></div>
+  </div> -->
+
+  <div id="scoreboard">
+    <span id="score1">0</span> - <span id="score2">0</span>
+    <div id="turnInfo">Giliran: Pemain 1</div>
+  </div>
+
+  <div id="controls">
+    <button id="rollBtn">Roll Dadu</button>
+    <button id="resetBtn">Reset Game</button>
+    <button id="musicBtn">🔇 Music</button> <!-- Tambahkan ini -->
+  </div>
+
+  <div id="toast" class="hidden"></div>
+
+  <script>
+    // ===== GAME CONFIGURATION =====
+    const CONFIG = {
+      IMAGE_PATHS: {
+        BOARD: 'img/board.png',
+        CAR1: 'img/car1.png',
+        CAR2: 'img/car2.png',
+        DICE: {
+          1: 'img/dice1.png',
+          2: 'img/dice2.png',
+          3: 'img/dice3.png',
+          4: 'img/dice4.png',
+          5: 'img/dice5.png',
+          6: 'img/dice6.png'
+        },
+        CARDS: {
+          LUCK: [
+            'img/card-luck01.png',
+            'img/card-luck02.png',
+            'img/card-luck03.png',
+            'img/card-luck04.png',
+            'img/card-luck05.png',
+            'img/card-luck06.png'
+          ],
+          PENALTY: [
+            'img/card-penalty01.png',
+            'img/card-penalty02.png',
+            'img/card-penalty03.png',
+            'img/card-penalty04.png',
+            'img/card-penalty05.png',
+            'img/card-penalty06.png'
+          ],
+          QUESTION: 'img/card-question1.png'
+        },
+        SOUNDS: {
+          ROLL: 'sounds/dice-roll.mp3',
+          CARD: 'sounds/card-sounds-35956.mp3',
+          CORRECT: 'sounds/correct-6033.mp3',
+          WRONG: 'sounds/wrong-47985.mp3',
+          WIN: 'sounds/win.wav',
+          BG_MUSIC: 'sounds/bg-music.mp3'
+        },
+        QUESTION: [
+          {
+            image: 'img/card-question1.png',
+            win: 7,
+            lose: -6,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question3.png',
+            win: 7,
+            lose: -6,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question4.png',
+            win: 7,
+            lose: -6,
+            answer: 'a'
+          },
+          {
+            image: 'img/card-question5.png',
+            win: 7,
+            lose: -6,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question6.png',
+            win: 4,
+            lose: -3,
+            answer: 'c'
+          },
+          {
+            image: 'img/card-question7.png',
+            win: 4,
+            lose: -3,
+            answer: 'a'
+          },
+          {
+            image: 'img/card-question8.png',
+            win: 4,
+            lose: -3,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question9.png',
+            win: 4,
+            lose: -3,
+            answer: 'a'
+          },
+          {
+            image: 'img/card-question10.png',
+            win: 4,
+            lose: -3,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question11.png',
+            win: 5,
+            lose: -4,
+            answer: 'a'
+          },
+          {
+            image: 'img/card-question12.png',
+            win: 5,
+            lose: -4,
+            answer: 'c'
+          },
+          {
+            image: 'img/card-question13.png',
+            win: 5,
+            lose: -4,
+            answer: 'c'
+          },
+          {
+            image: 'img/card-question14.png',
+            win: 5,
+            lose: -4,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question15.png',
+            win: 5,
+            lose: -4,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question16.png',
+            win: 2,
+            lose: -3,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question17.png',
+            win: 2,
+            lose: -3,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question18.png',
+            win: 2,
+            lose: -3,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question19.png',
+            win: 2,
+            lose: -3,
+            answer: 'b'
+          },
+          {
+            image: 'img/card-question20.png',
+            win: 2,
+            lose: -3,
+            answer: 'b'
+          }
+        ]
+      }
+    };
+
+    // ===== Koordinat papan =====
+    const cellPositions = [
+      { "x": 318.58, "y": 645.44 }, { "x": 469.91, "y": 639.48 }, { "x": 553.54, "y": 635.50 },
+      { "x": 627.21, "y": 639.48 }, { "x": 690.93, "y": 639.48 }, { "x": 772.57, "y": 625.56 },
+      { "x": 824.34, "y": 591.75 }, { "x": 840.27, "y": 536.07 }, { "x": 838.27, "y": 480.39 },
+      { "x": 838.27, "y": 418.74 }, { "x": 794.47, "y": 384.93 }, { "x": 714.82, "y": 384.93 },
+      { "x": 643.14, "y": 382.95 }, { "x": 581.42, "y": 402.83 }, { "x": 543.58, "y": 440.62 },
+      { "x": 525.66, "y": 496.30 }, { "x": 487.83, "y": 542.04 }, { "x": 418.14, "y": 565.90 },
+      { "x": 344.47, "y": 565.90 }, { "x": 280.75, "y": 569.88 }, { "x": 205.09, "y": 569.88 },
+      { "x": 129.42, "y": 551.98 }, { "x": 75.66, "y": 506.24 }, { "x": 57.74, "y": 450.56 },
+      { "x": 65.71, "y": 394.88 }, { "x": 97.57, "y": 333.23 }, { "x": 169.25, "y": 337.21 },
+      { "x": 246.90, "y": 339.20 }, { "x": 308.63, "y": 335.22 }, { "x": 392.26, "y": 329.25 },
+      { "x": 465.93, "y": 341.18 }, { "x": 541.59, "y": 339.20 }, { "x": 617.26, "y": 337.21 },
+      { "x": 688.94, "y": 333.23 }, { "x": 754.65, "y": 309.37 }, { "x": 806.42, "y": 259.65 },
+      { "x": 806.42, "y": 211.92 }, { "x": 766.59, "y": 162.21 }, { "x": 714.82, "y": 134.37 },
+      { "x": 649.12, "y": 132.38 }, { "x": 587.39, "y": 148.29 }, { "x": 543.58, "y": 184.08 },
+      { "x": 517.70, "y": 237.77 }, { "x": 469.91, "y": 265.62 }, { "x": 398.23, "y": 279.54 },
+      { "x": 332.52, "y": 257.66 }, { "x": 268.81, "y": 243.74 }, { "x": 181.19, "y": 225.84 },
+      { "x": 121.46, "y": 182.09 }, { "x": 101.55, "y": 128.40 }, { "x": 123.45, "y": 72.72 }
+    ];
+
+    // ===== Canvas & Images =====
+    const canvas = document.getElementById('gameBoard');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 900;
+    canvas.height = 700;
+
+    const boardImg = new Image();
+    boardImg.src = CONFIG.IMAGE_PATHS.BOARD;
+
+    const car1 = new Image();
+    car1.src = CONFIG.IMAGE_PATHS.CAR1;
+
+    const car2 = new Image();
+    car2.src = CONFIG.IMAGE_PATHS.CAR2;
+
+    const diceFrames = Object.values(CONFIG.IMAGE_PATHS.DICE);
+
+    // ===== Elemen UI =====
+    const score1El = document.getElementById('score1');
+    const score2El = document.getElementById('score2');
+    const turnInfo = document.getElementById('turnInfo');
+    const rollBtn = document.getElementById('rollBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const cardAnim = document.getElementById('cardAnim');
+    const cardImg = document.getElementById('cardImg');
+    const cardText = document.getElementById('cardText');
+    const diceAnim = document.getElementById('diceAnim');
+    const diceImg = document.getElementById('diceImg');
+    const questionModal = document.getElementById('questionModal');
+    const modalQuestion = document.getElementById('modalQuestion');
+    const modalOptions = document.getElementById('modalOptions');
+    const modalClose = document.getElementById('modalClose');
+    const toastEl = document.getElementById('toast');
+
+    // ===== Sound =====
+    const soundRoll = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.ROLL);
+    const soundCard = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.CARD);
+    const soundCorrect = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.CORRECT);
+    const soundWrong = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.WRONG);
+    const soundWin = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.WIN);
+    const bgMusic = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.BG_MUSIC);
+    bgMusic.addEventListener('ended', function() {
+      console.log('Music ended, restarting...');
+      this.currentTime = 0;
+      this.play().catch(e => console.log('Failed to restart music:', e));
+    });
+
+    // ===== Game State =====
+    let positions = [0, 0];
+    let scores = [0, 0];
+    let turn = 0;
+    let skipTurn = [false, false];
+    let animating = false;
+    let extraTurn = false;
+    let shield = [0, 0]; // Tambahkan variabel shield yang hilang
+    let skipTurnCount = [0, 0]; // Tambahkan variabel skipTurnCount yang hilang
+
+    // ===== Special Cells =====
+    const specialCells = {
+      2: 'penalty', 3: 'luck', 5: 'park', 8: 'question',
+      12: 'stop', 13: 'penalty', 15: 'luck', 17: 'penalty', 21: 'park',
+      22: 'question', 23: 'luck', 27: 'luck', 28: 'park',
+      33: 'penalty', 37: 'luck', 39: 'park', 44: 'penalty',
+      46: 'luck', 48: 'park'
+    };
+
+    // ===== Cards & Questions =====
+    const luckCards = [
+      { text: "Maju 6 langkah, +10 poin", move: 6, score: 10, image: CONFIG.IMAGE_PATHS.CARDS.LUCK[0] },
+      { text: "Lempar dadu dan maju sesuai angka dadu, +20 poin", move: 0, score: 20, image: CONFIG.IMAGE_PATHS.CARDS.LUCK[1] },
+      { text: "Kebal 2 Hukuman, +5 poin", move: 0, score: 5, image: CONFIG.IMAGE_PATHS.CARDS.LUCK[2] },
+      { text: "Bonus giliran tambahan", move: 0, score: 0, image: CONFIG.IMAGE_PATHS.CARDS.LUCK[3] },
+      { text: "Lompat 3 langkah ke depan", move: 3, score: 0, image: CONFIG.IMAGE_PATHS.CARDS.LUCK[4] },
+      { text: "Dapat shield perlindungan", move: 0, score: 0, image: CONFIG.IMAGE_PATHS.CARDS.LUCK[5] }
+    ];
+
+    const penaltyCards = [
+      { text: "Mundur 1 langkah, -5 poin", move: -1, score: -5, image: CONFIG.IMAGE_PATHS.CARDS.PENALTY[0] },
+      { text: "Mundur 6 langkah, -15 poin", move: -6, score: -15, image: CONFIG.IMAGE_PATHS.CARDS.PENALTY[1] },
+      { text: "Kembali Ke start, -5 poin", move: 0, score: -5, image: CONFIG.IMAGE_PATHS.CARDS.PENALTY[2] },
+      { text: "Berhenti 2 giliran", move: 0, score: -5, image: CONFIG.IMAGE_PATHS.CARDS.PENALTY[3] },
+      { text: "Tutup mata sampai giliran mu, -10 poin", move: 0, score: -10, image: CONFIG.IMAGE_PATHS.CARDS.PENALTY[4] },
+      { text: "Lempar dadu dan mundur sesuai angka dadu, -10 poin", move: 0, score: -10, image: CONFIG.IMAGE_PATHS.CARDS.PENALTY[5] }
+    ];
+
+    // ===== UTILITY FUNCTIONS =====
+
+    /**
+     * Menampilkan pesan toast
+     * @param {string} msg - Pesan yang akan ditampilkan
+     */
+    function toast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      setTimeout(() => toastEl.classList.remove('show'), 2000);
+    }
+
+    /**
+     * Mengacak dadu (1-6)
+     * @returns {number} Nilai dadu
+     */
+    function randDice() {
+      // return 4
+      return Math.floor(Math.random() * 6) + 1; 
+    }
+
+    // ===== GAME DRAWING FUNCTIONS =====
+
+    /**
+     * Menggambar papan permainan dan posisi pemain
+     */
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(boardImg, 0, 0, canvas.width, canvas.height);
+
+      const p1 = cellPositions[positions[0]];
+      const p2 = cellPositions[positions[1]];
+
+      if (p1) ctx.drawImage(car1, p1.x - 20, p1.y - 32, 64, 64);
+      if (p2) ctx.drawImage(car2, p2.x + 10, p2.y - 32, 64, 64);
+
+      score1El.textContent = scores[0];
+      score2El.textContent = scores[1];
+      turnInfo.textContent = 'Giliran: Pemain ' + (turn + 1);
+    }
+
+    // ===== ANIMATION FUNCTIONS =====
+
+    /**
+     * Animasi dadu
+     * @param {number} result - Hasil akhir dadu
+     * @param {function} callback - Fungsi yang dipanggil setelah animasi selesai
+     */
+    function animateDice(result, callback) {
+      diceAnim.classList.remove('hidden');
+      diceAnim.classList.add('show');
+
+      soundRoll.currentTime = 0;
+      soundRoll.play().catch(() => { });
+
+      let frames = 0;
+      const maxFrames = 18 + Math.floor(Math.random() * 6);
+
+      const interval = setInterval(() => {
+        const idx = Math.floor(Math.random() * 6);
+        diceImg.src = diceFrames[idx];
+        frames++;
+
+        if (frames >= maxFrames) {
+          clearInterval(interval);
+          diceImg.src = diceFrames[result - 1];
+
+          setTimeout(() => {
+            diceAnim.classList.remove('show');
+            diceAnim.classList.add('hidden');
+            if (callback) callback();
+          }, 600);
+        }
+      }, 80);
+    }
+
+    /**
+     * Animasi kartu
+     * @param {number} x - Posisi X
+     * @param {number} y - Posisi Y
+     * @param {string} text - Teks kartu
+     * @param {string} img - Path gambar kartu
+     */
+    function showCardAnimation(x, y, text, img) {
+      cardImg.src = img;
+      // cardText.textContent = text;
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      // Hitung posisi card relatif terhadap canvas
+      // x dan y adalah koordinat dalam canvas, tambahkan dengan posisi canvas di halaman
+      const cardX = canvasRect.left + x - 60; // Center card di posisi x pemain
+      const cardY = canvasRect.top + y - 80;
+
+      // cardAnim.style.left = `${x - 50}px`;
+      // cardAnim.style.top = `${y - 30}px`;
+
+      cardAnim.style.left = `${cardX}px`;
+      cardAnim.style.top = `${cardY}px`;
+
+      // Tambahkan event listener untuk klik card (popup besar)
+      cardAnim.onclick = function (e) {
+        if (e.target.id !== 'cardCloseBtn' && !e.target.closest('#cardCloseBtn')) {
+          showCardPopup(text, img);
+        }
+      };
+
+
+      // Tambahkan tombol close
+      if (!document.getElementById('cardCloseBtn')) {
+        const closeBtn = document.createElement('div');
+        closeBtn.id = 'cardCloseBtn';
+        closeBtn.innerHTML = '✖';
+        closeBtn.style.cssText = `
+          position: absolute;
+          top: 5px;
+          right: 8px;
+          cursor: pointer;
+          font-size: 18px;
+          color: #fff;
+          background: rgba(0,0,0,0.5);
+          width: 25px;
+          height: 25px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 21;
+        `;
+        closeBtn.onclick = function (e) {
+          e.stopPropagation(); // Mencegah trigger klik card
+          hideCardAnimation();
+        };
+        cardAnim.appendChild(closeBtn);
+      }
+
+      cardAnim.classList.remove('hidden');
+      cardAnim.classList.add('show');
+
+      soundCard.currentTime = 0;
+      soundCard.play().catch(() => { });
+
+      // Auto hide setelah 5 detik (bukan 1.8 detik)
+      // cardAnim.autoHideTimeout = setTimeout(hideCardAnimation, 5000);
+    }
+
+    function showCardPopup(text, img) {
+      // Sembunyikan card kecil terlebih dahulu
+      hideCardAnimation();
+
+      // Buat atau gunakan popup yang sudah ada
+      let popup = document.getElementById('cardPopup');
+      if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'cardPopup';
+        popup.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 300px;
+          height: 400px;
+          background: rgba(0, 0, 0, 0.9);
+          border-radius: 15px;
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+          z-index: 100;
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          color: white;
+          text-align: center;
+        `;
+
+        // Gambar kartu besar
+        const popupImg = document.createElement('img');
+        popupImg.id = 'popupCardImg';
+        popupImg.style.cssText = `
+          width: 200px;
+          height: 260px;
+          border-radius: 10px;
+          margin-bottom: 15px;
+        `;
+
+        // Teks kartu besar
+        const popupText = document.createElement('div');
+        popupText.id = 'popupCardText';
+        popupText.style.cssText = `
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 15px;
+          line-height: 1.4;
+        `;
+
+        // Tombol close popup
+        const closePopupBtn = document.createElement('div');
+        closePopupBtn.id = 'closePopupBtn';
+        closePopupBtn.innerHTML = '✖';
+        closePopupBtn.style.cssText = `
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          cursor: pointer;
+          font-size: 24px;
+          color: #fff;
+          background: rgba(255,0,0,0.7);
+          width: 35px;
+          height: 35px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 101;
+        `;
+        closePopupBtn.onclick = hideCardPopup;
+
+        // Tombol tutup di bawah
+        const closeBottomBtn = document.createElement('button');
+        closeBottomBtn.textContent = 'Tutup';
+        closeBottomBtn.style.cssText = `
+          padding: 10px 20px;
+          background: #e74c3c;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: bold;
+        `;
+        closeBottomBtn.onclick = hideCardPopup;
+
+        popup.appendChild(closePopupBtn);
+        popup.appendChild(popupImg);
+        popup.appendChild(popupText);
+        popup.appendChild(closeBottomBtn);
+        document.body.appendChild(popup);
+      }
+
+      // Set konten popup
+      document.getElementById('popupCardImg').src = img;
+      document.getElementById('popupCardText').textContent = text;
+
+      // Tampilkan popup dengan animasi
+      popup.style.display = 'flex';
+      setTimeout(() => {
+        popup.style.opacity = '1';
+        popup.style.transform = 'translate(-50%, -50%) scale(1)';
+      }, 10);
+    }
+
+    /**
+     * Menyembunyikan popup besar kartu
+     */
+    function hideCardPopup() {
+      const popup = document.getElementById('cardPopup');
+      if (popup) {
+        popup.style.opacity = '0';
+        popup.style.transform = 'translate(-50%, -50%) scale(0.8)';
+        setTimeout(() => {
+          popup.style.display = 'none';
+        }, 300);
+      }
+    }
+
+
+    /**
+     * Menyembunyikan animasi kartu
+     */
+    function hideCardAnimation() {
+      // Clear timeout jika ada
+      if (cardAnim.autoHideTimeout) {
+        clearTimeout(cardAnim.autoHideTimeout);
+      }
+
+      cardAnim.classList.remove('show');
+      setTimeout(() => cardAnim.classList.add('hidden'), 400);
+    }
+
+    // ===== GAME LOGIC FUNCTIONS =====
+
+    /**
+     * Memutar dadu dan memulai giliran
+     */
+    function rollDice() {
+      if (animating) return;
+
+      // Handle skipTurnCount
+      if (skipTurnCount[turn] > 0) {
+        skipTurnCount[turn]--;
+        toast('⏸ Pemain ' + (turn + 1) + ' berhenti ' + (skipTurnCount[turn] > 0 ? skipTurnCount[turn] + ' giliran lagi' : 'giliran ini'));
+        if (skipTurnCount[turn] === 0) {
+          turn = 1 - turn;
+        }
+        draw();
+        return;
+      }
+
+      if (skipTurn[turn]) {
+        toast('⏸ Pemain ' + (turn + 1) + ' kehilangan giliran');
+        skipTurn[turn] = false;
+        turn = 1 - turn;
+        draw();
+        return;
+      }
+
+      const d = randDice();
+      animateDice(d, () => moveStepByStep(turn, d));
+    }
+
+    /**
+     * Memindahkan pemain selangkah demi selangkah
+     * @param {number} player - Indeks pemain
+     * @param {number} steps - Jumlah langkah
+     */
+    function moveStepByStep(player, steps) {
+      animating = true;
+      let moved = 0;
+
+      const interval = setInterval(() => {
+        if (moved < steps) {
+          if (positions[player] < cellPositions.length - 1) {
+            positions[player]++;
+            draw();
+          }
+          moved++;
+        } else {
+          clearInterval(interval);
+          handleLanding(player);
+          if (!extraTurn) turn = 1 - turn;
+          else extraTurn = false;
+          animating = false;
+        }
+      }, 500);
+    }
+
+    /**
+     * Menangani efek ketika pemain mendarat di sel khusus
+     * @param {number} player - Indeks pemain
+     */
+    function handleLanding(player) {
+      const idx = positions[player];
+
+      if (specialCells[idx]) {
+        const type = specialCells[idx];
+        const playerPos = cellPositions[idx];
+
+        if (type === 'luck') {
+          handleLuckCard(player, playerPos);
+          return;
+        }
+
+        if (type === 'penalty') {
+          handlePenaltyCard(player, playerPos);
+          return;
+        }
+
+        if (type === 'question') {
+          showQuestionModal(player);
+          return;
+        }
+
+        if (type === 'stop') {
+          skipTurn[player] = true;
+          toast('🚫 Stop! Pemain ' + (player + 1) + ' kehilangan giliran');
+          return;
+        }
+
+        if (type === 'park') {
+          positions[player] = Math.max(0, positions[player] - 2);
+          toast('🅿️ Parkir! Mundur 2 kotak');
+          draw();
+          return;
+        }
+      }
+
+      if (idx === cellPositions.length - 1) {
+        toast('🎉 Pemain ' + (player + 1) + ' MENANG!');
+        soundWin.currentTime = 0;
+        soundWin.play().catch(() => { });
+      }
+    }
+
+    /**
+     * Menangani kartu keberuntungan
+     * @param {number} player - Indeks pemain
+     * @param {object} playerPos - Posisi pemain
+     */
+    function handleLuckCard(player, playerPos) {
+      const card = luckCards[Math.floor(Math.random() * luckCards.length)];
+      showCardAnimation(playerPos.x, playerPos.y, card.text, card.image);
+
+      setTimeout(() => {
+        // Handle setiap kartu berdasarkan teks deskripsinya
+        if (card.text.includes("Maju 6 langkah")) {
+          positions[player] = Math.min(cellPositions.length - 1, positions[player] + 6);
+          scores[player] += 10;
+          toast("🎲 Maju 6 langkah! +10 poin");
+        }
+        else if (card.text.includes("Lempar dadu dan maju")) {
+          const extra = randDice();
+          positions[player] = Math.min(cellPositions.length - 1, positions[player] + extra);
+          scores[player] += 20;
+          toast("🎲 Lempar dadu: " + extra + " → maju " + extra + " langkah! +20 poin");
+        }
+        else if (card.text.includes("Kebal 2 Hukuman")) {
+          shield[player] = 2;
+          scores[player] += 5;
+          toast("🛡 Kebal 2 hukuman! +5 poin");
+        }
+        else if (card.text.includes("Bonus giliran tambahan")) {
+          extraTurn = true;
+          toast("🔁 Bonus giliran tambahan!");
+        }
+        else if (card.text.includes("Lompat 3 langkah")) {
+          positions[player] = Math.min(cellPositions.length - 1, positions[player] + 3);
+          toast("🚀 Lompat 3 langkah ke depan!");
+        }
+        else if (card.text.includes("Dapat shield perlindungan")) {
+          shield[player] = 1;
+          toast("🛡 Dapat shield perlindungan!");
+        }
+
+        draw();
+      }, 1500);
+
+      soundCard.currentTime = 0;
+      soundCard.play().catch(() => { });
+    }
+
+    /**
+     * Menangani kartu hukuman
+     * @param {number} player - Indeks pemain
+     * @param {object} playerPos - Posisi pemain
+     */
+    function handlePenaltyCard(player, playerPos) {
+      if (shield[player] > 0) {
+        shield[player]--;
+        toast("🛡 Pemain " + (player + 1) + " kebal hukuman! Sisa " + shield[player]);
+        return;
+      }
+
+      const card = penaltyCards[Math.floor(Math.random() * penaltyCards.length)];
+      showCardAnimation(playerPos.x, playerPos.y, card.text, card.image);
+
+      setTimeout(() => {
+        // Handle setiap kartu berdasarkan teks deskripsinya
+        if (card.text.includes("Mundur 1 langkah")) {
+          positions[player] = Math.max(0, positions[player] - 1);
+          scores[player] -= 5;
+          toast("🔙 Mundur 1 langkah! -5 poin");
+        }
+        else if (card.text.includes("Mundur 6 langkah")) {
+          positions[player] = Math.max(0, positions[player] - 6);
+          scores[player] -= 15;
+          toast("🔙 Mundur 6 langkah! -15 poin");
+        }
+        else if (card.text.includes("Kembali Ke start")) {
+          positions[player] = 0;
+          scores[player] -= 5;
+          toast("🏁 Kembali ke start! -5 poin");
+        }
+        else if (card.text.includes("Berhenti 2 giliran")) {
+          skipTurnCount[player] = 2;
+          scores[player] -= 5;
+          toast("⏸ Berhenti 2 giliran! -5 poin");
+        }
+        else if (card.text.includes("Tutup mata sampai giliran mu")) {
+          skipTurn[player] = true;
+          scores[player] -= 10;
+          toast("👁️ Tutup mata! Lewat 1 giliran! -10 poin");
+        }
+        else if (card.text.includes("Lempar dadu dan mundur")) {
+          const extra = randDice();
+          positions[player] = Math.max(0, positions[player] - extra);
+          scores[player] -= 10;
+          toast("🎲 Lempar dadu: " + extra + " → mundur " + extra + " langkah! -10 poin");
+        }
+
+        draw();
+      }, 1500);
+
+      soundCard.currentTime = 0;
+      soundCard.play().catch(() => { });
+    }
+
+    /**
+     * Menampilkan modal pertanyaan
+     * @param {number} player - Indeks pemain
+     */
+    function showQuestionModal(player) {
+      const questionData = CONFIG.IMAGE_PATHS.QUESTION[Math.floor(Math.random() * CONFIG.IMAGE_PATHS.QUESTION.length)];
+
+      // Buat modal question khusus
+      let questionModal = document.getElementById('questionModal');
+      if (!questionModal) {
+        questionModal = document.createElement('div');
+        questionModal.id = 'questionModal';
+
+        // Tombol close
+        const closeBtn = document.createElement('div');
+        closeBtn.id = 'modalClose';
+        closeBtn.innerHTML = '✖';
+        closeBtn.onclick = () => questionModal.style.display = 'none';
+
+        // Gambar pertanyaan
+        const questionImg = document.createElement('img');
+        questionImg.id = 'questionImg';
+
+        // Opsi jawaban
+        const optionsDiv = document.createElement('div');
+        optionsDiv.id = 'questionOptions';
+
+        questionModal.appendChild(closeBtn);
+        questionModal.appendChild(questionImg);
+        questionModal.appendChild(optionsDiv);
+        document.body.appendChild(questionModal);
+      }
+
+      // Set gambar pertanyaan
+      document.getElementById('questionImg').src = questionData.image;
+
+      // Buat opsi ABC
+      const optionsDiv = document.getElementById('questionOptions');
+      optionsDiv.innerHTML = '';
+
+      const options = ['a', 'b', 'c'];
+      options.forEach(option => {
+        const optionBtn = document.createElement('button');
+        optionBtn.textContent = option.toUpperCase();
+        optionBtn.onclick = () => handleAnswer(player, option === questionData.answer, questionData);
+        optionsDiv.appendChild(optionBtn);
+      });
+
+      // Tampilkan modal
+      questionModal.style.display = 'block';
+    }
+    /**
+     * Menangani jawaban pertanyaan
+     * @param {number} player - Indeks pemain
+     * @param {boolean} isCorrect - Apakah jawaban benar
+     * @param {object} questionData - Data pertanyaan termasuk win/lose points
+     */
+    function handleAnswer(player, isCorrect, questionData) {
+      // Sembunyikan modal
+      const questionModal = document.getElementById('questionModal');
+      if (questionModal) {
+        questionModal.style.display = 'none';
+      }
+
+      if (isCorrect) {
+        // positions[player] = Math.min(cellPositions.length - 1, positions[player] + questionData.win);
+        scores[player] += questionData.win;
+        toast('✅ Jawaban benar! +' + questionData.win + ' poin');
+        soundCorrect.currentTime = 0;
+        soundCorrect.play().catch(() => { });
+      } else {
+        // positions[player] = Math.max(0, positions[player] + questionData.lose);
+        scores[player] += questionData.lose;
+        toast('❌ Jawaban salah! ' + questionData.lose + ' poin');
+        soundWrong.currentTime = 0;
+        soundWrong.play().catch(() => { });
+      }
+
+      draw();
+    }
+
+    // ===== Music Control =====
+    let musicPlaying = false;
+
+    /**
+     * Mengontrol background music
+     */
+    function toggleMusic() {
+      const musicBtn = document.getElementById('musicBtn');
+
+      if (musicPlaying) {
+        bgMusic.pause();
+        musicBtn.textContent = '🔇 Music';
+        musicPlaying = false;
+      } else {
+        bgMusic.play().catch(e => {
+          console.log('Autoplay blocked, user interaction required');
+          // Fallback: minta user klik tombol lagi
+          toast('Klik tombol Music lagi untuk memulai');
+        });
+        musicBtn.textContent = '🔊 Music';
+        musicPlaying = true;
+      }
+    }
+
+    // Event listener untuk tombol music (tambahkan di bagian event listeners)
+    document.getElementById('musicBtn').onclick = toggleMusic;
+
+    // Optional: Auto play music setelah user berinteraksi pertama kali
+    let firstInteraction = false;
+
+    function handleFirstInteraction() {
+      if (!firstInteraction) {
+        firstInteraction = true;
+        // Coba play music otomatis setelah interaksi pertama
+        if (!musicPlaying) {
+          bgMusic.play().then(() => {
+            musicPlaying = true;
+            document.getElementById('musicBtn').textContent = '🔊 Music';
+          }).catch(e => {
+            // Autoplay mungkin diblokir, biarkan user klik manual
+            console.log('Autoplay blocked');
+          });
+        }
+      }
+    }
+
+    // Tambahkan event listeners untuk interaksi pertama
+    rollBtn.addEventListener('click', handleFirstInteraction);
+    resetBtn.addEventListener('click', handleFirstInteraction);
+    document.getElementById('musicBtn').addEventListener('click', handleFirstInteraction);
+
+
+    /**
+     * Mereset permainan
+     */
+    function resetGame() {
+      positions = [0, 0];
+      scores = [0, 0];
+      turn = 0;
+      skipTurn = [false, false];
+      shield = [0, 0];
+      skipTurnCount = [0, 0];
+      draw();
+    }
+
+    // ===== EVENT LISTENERS =====
+    rollBtn.onclick = rollDice;
+    resetBtn.onclick = resetGame;
+    // modalClose.onclick = () => questionModal.style.display = 'none';
+    boardImg.onload = draw;
+  </script>
+</body>
+
+</html>

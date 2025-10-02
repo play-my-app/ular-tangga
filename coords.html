@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Ambil Koordinat Papan</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial;
+    }
+
+    canvas {
+      border: 2px solid black;
+      display: block;
+      margin: 10px auto;
+    }
+
+    #output {
+      white-space: pre;
+      text-align: left;
+      max-width: 800px;
+      margin: 20px auto;
+      background: #f9f9f9;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>Klik kotak papan sesuai urutan (START → FINISH)</h2>
+  <p>Setiap klik akan disimpan sebagai koordinat pion.</p>
+  <canvas id="boardCanvas"></canvas>
+  <button id="undoBtn">↩️ Undo</button>
+  <button id="clearBtn">🗑️ Clear</button>
+  <button id="copyBtn">📋 Copy JSON</button>
+  <div id="output"></div>
+
+  <script>
+    const canvas = document.getElementById("boardCanvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.src = "board.png"; // pakai papan asli kamu
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+
+    let coords = [];
+
+    canvas.addEventListener("click", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      coords.push({ x: Math.round(x), y: Math.round(y) });
+      redraw();
+    });
+
+    function redraw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "red";
+      coords.forEach((c, i) => {
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillText(i, c.x + 10, c.y);
+      });
+      document.getElementById("output").textContent = JSON.stringify(coords, null, 2);
+    }
+
+    document.getElementById("undoBtn").onclick = () => {
+      coords.pop(); redraw();
+    };
+    document.getElementById("clearBtn").onclick = () => {
+      coords = []; redraw();
+    };
+    document.getElementById("copyBtn").onclick = () => {
+      navigator.clipboard.writeText(JSON.stringify(coords, null, 2));
+      alert("JSON disalin, paste ke file coords.json");
+    };
+  </script>
+</body>
+
+</html>
