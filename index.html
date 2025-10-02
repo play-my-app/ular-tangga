@@ -301,6 +301,102 @@
     #musicBtn:hover {
       background: #8e44ad !important;
     }
+
+    /* ===== QR Code Modal ===== */
+    #qrModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    #qrModal.show {
+      display: flex;
+      animation: modalPop 0.3s ease-out;
+    }
+
+    #qrImage {
+      width: 250px;
+      height: 250px;
+      margin: 15px 0;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+    }
+
+    #qrText {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #333;
+      word-break: break-all;
+      max-width: 300px;
+    }
+
+    #qrCloseBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #e74c3c;
+      background: rgba(0, 0, 0, 0.1);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    #qrCloseBtn:hover {
+      background: rgba(231, 76, 60, 0.2);
+    }
+
+    @keyframes modalPop {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.7);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    /* Overlay background */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 99;
+      display: none;
+    }
+
+    .modal-overlay.show {
+      display: block;
+    }
+
+    #qrBtn {
+      background: #e67e22 !important;
+    }
+
+    #qrBtn:hover {
+      background: #d35400 !important;
+    }
   </style>
 </head>
 
@@ -326,6 +422,7 @@
     <button id="rollBtn">Roll Dadu</button>
     <button id="resetBtn">Reset Game</button>
     <button id="musicBtn">🔇 Music</button> <!-- Tambahkan ini -->
+    <button id="qrBtn">📱 QR Code</button>
   </div>
 
   <div id="toast" class="hidden"></div>
@@ -334,7 +431,7 @@
     // ===== GAME CONFIGURATION =====
     const CONFIG = {
       IMAGE_PATHS: {
-        BOARD: 'img/Board.PNG',
+        BOARD: 'img/board.png',
         CAR1: 'img/car1.png',
         CAR2: 'img/car2.png',
         DICE: {
@@ -553,7 +650,7 @@
     const soundWrong = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.WRONG);
     const soundWin = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.WIN);
     const bgMusic = new Audio(CONFIG.IMAGE_PATHS.SOUNDS.BG_MUSIC);
-    bgMusic.addEventListener('ended', function() {
+    bgMusic.addEventListener('ended', function () {
       console.log('Music ended, restarting...');
       this.currentTime = 0;
       this.play().catch(e => console.log('Failed to restart music:', e));
@@ -615,7 +712,7 @@
      */
     function randDice() {
       // return 4
-      return Math.floor(Math.random() * 6) + 1; 
+      return Math.floor(Math.random() * 6) + 1;
     }
 
     // ===== GAME DRAWING FUNCTIONS =====
@@ -1215,7 +1312,78 @@
     resetBtn.addEventListener('click', handleFirstInteraction);
     document.getElementById('musicBtn').addEventListener('click', handleFirstInteraction);
 
+    function showQRCode() {
+      // Buat modal QR jika belum ada
+      let qrModal = document.getElementById('qrModal');
+      let overlay = document.querySelector('.modal-overlay');
 
+      if (!qrModal) {
+        // Buat overlay
+        overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.onclick = hideQRCode;
+
+        // Buat modal
+        qrModal = document.createElement('div');
+        qrModal.id = 'qrModal';
+
+        // Tombol close
+        const closeBtn = document.createElement('div');
+        closeBtn.id = 'qrCloseBtn';
+        closeBtn.innerHTML = '✖';
+        closeBtn.onclick = hideQRCode;
+
+        // Judul
+        const title = document.createElement('h3');
+        title.textContent = 'Scan QR Code';
+        title.style.margin = '0 0 15px 0';
+        title.style.color = '#2c3e50';
+
+        // Gambar QR
+        const qrImage = document.createElement('img');
+        qrImage.id = 'qrImage';
+        qrImage.src = 'img/qr.png';
+        qrImage.alt = 'QR Code';
+
+        // Teks URL
+        // const qrText = document.createElement('div');
+        // qrText.id = 'qrText';
+        // qrText.textContent = window.location.href;
+
+        qrModal.appendChild(closeBtn);
+        qrModal.appendChild(title);
+        qrModal.appendChild(qrImage);
+        // qrModal.appendChild(qrText);
+
+        document.body.appendChild(overlay);
+        document.body.appendChild(qrModal);
+      }
+
+      // Update URL saat ini
+      const qrText = document.getElementById('qrText');
+      if (qrText) {
+        qrText.textContent = window.location.href;
+      }
+
+      // Tampilkan modal dan overlay
+      overlay.classList.add('show');
+      qrModal.classList.add('show');
+    }
+
+    /**
+     * Menyembunyikan QR Code modal
+     */
+    function hideQRCode() {
+      const qrModal = document.getElementById('qrModal');
+      const overlay = document.querySelector('.modal-overlay');
+
+      if (qrModal) {
+        qrModal.classList.remove('show');
+      }
+      if (overlay) {
+        overlay.classList.remove('show');
+      }
+    }
     /**
      * Mereset permainan
      */
@@ -1229,6 +1397,19 @@
       draw();
     }
 
+    document.getElementById('qrBtn').addEventListener('click', showQRCode);
+
+    // Juga tambahkan ke handleFirstInteraction jika perlu
+    function handleFirstInteraction() {
+      if (!firstInteraction) {
+        firstInteraction = true;
+        console.log('First interaction detected');
+      }
+    }
+
+    // Tambahkan event listener untuk tombol QR juga
+    document.getElementById('qrBtn').addEventListener('click', handleFirstInteraction);
+
     // ===== EVENT LISTENERS =====
     rollBtn.onclick = rollDice;
     resetBtn.onclick = resetGame;
@@ -1236,6 +1417,5 @@
     boardImg.onload = draw;
   </script>
 </body>
-
 
 </html>
